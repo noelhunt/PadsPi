@@ -1,0 +1,20 @@
+Compiling with no flags will generate a terminal identical to Tom Cargill's
+1985 original.
+
+Compile-time flags:
+
+HALFDUPLEX	Gives padsterm the feel of a terminal window on the Blit.
+
+SCROLL		Changes the scrolling behaviour; this was originally part
+		of the 'jtools' port.
+
+SAMTERM		In conjuction with SCROLL makes  scroll  bars  look  like
+		samterm's  scroll bars, with a 1-pixel border between the
+		scrollbar proper and the text.
+
+TAGS		The text in the sentinel line is now displayed in a back-
+		ground  colour.  The  tag does not scroll, in contrast to
+		the original pads design where the sentinel line is  dis-
+		played  as  the  first line in the pad but is scrolled as
+		normal which means the 'banner' can become invisible.
+

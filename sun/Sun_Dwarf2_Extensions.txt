@@ -1,0 +1,1013 @@
+
+Copyright 2003 Sun Microsystems, Inc. 
+4150 Network Circle, Santa Clara, U.S.A. 95054
+All rights reserved. 
+
+Please read the section: LEGAL NOTICE
+
+
+*****************************************************************
+
+
+                            Sun Dwarf2 Extensions
+
+This document  describes the Sun extensions made to the Dwarf2 debugging
+format.
+
+----------------------------------------------------------------------------
+
+Tags
+
+     DW_TAG_SUN_function_template (0x4201)
+
+          This TAG is what is being used for a C++ function
+          template definition.  (It should be similar to the GNU
+          extension DW_TAG_function_template, but since we didn't
+          have the details on this GNU extension we felt it was
+          safer for us to create our own).
+          This TAG could get the same attributes as the Standard
+          DW_TAG_subprogram.
+
+     DW_TAG_SUN_class_template (0x4202)
+
+          This TAG is being used for a C++ class template
+          definition. (It should be similar to the GNU extension
+          DW_TAG_class_template tag).
+          This TAG should be used only when the keyword "class"
+          was used in the template definition.
+          This TAG should get the same attributes as the Standard
+          DW_TAG_class_type.
+
+     DW_TAG_SUN_struct_template (0x4203)
+
+          This TAG is being used for a C++ struct template
+          definition. (It should be similar to the GNU extension
+          DW_TAG_class_template tag).
+          This TAG should be used only when the keyword "struct"
+          was used in the template definition.
+          This TAG should get the same attributes as the Standard
+          DW_TAG_class_type.
+
+     DW_TAG_SUN_union_template (0x4204)
+
+          This TAG is being used for a C++ union template
+          definition. (It should be similar to the GNU extension
+          DW_TAG_class_template tag).
+          This TAG should be used only when the keyword "union"
+          was used in the template definition.
+          This TAG should get the same attributes as the Standard
+          DW_TAG_class_type.
+
+     DW_TAG_SUN_indirect_inheritance (0x4205)
+
+          This TAG is being used for Sun C++ ABI virtual
+          inheritance information.  Information about virtual
+	  base classes that are ancestors of this type is recorded
+	  using this tag, because DW_TAG_inheritance records only
+	  information about direct base classes.
+          This TAG could get the same attributes as the Standard
+          DW_TAG_inheritance.  Except that DW_AT_accessibility is
+	  not needed for non-direct base classes.  Perhaps
+	  the "pure virtual" level of virtuality is also not needed.
+
+     DW_TAG_SUN_codeflags (0x4206)
+
+          This TAG records one specific boolean logical flag
+          associated with any number of instructions in the current
+          function.  The instructions are identified by offsets from
+          low_pc of the function.  The tag appears only inside functions.
+
+          It has two valid attributes.
+
+          DW_AT_SUN_cf_kind records a code value that represents the
+          boolean flag that should be associated with the given
+          instructions.  These code values are defined as symbols
+          starting with DW_ATCF_SUN_.  For a list of possible
+          flags and their meanings, see elsewhere in this document.
+
+          DW_AT_SUN_func_offsets records the offsets of the instructions
+          that should be marked with this flag.  The offsets are
+          sorted and recording using run length encoding. The first
+          number in the value of this attribute is the offset from
+          the low_pc of the function to the first instruction with this
+          flag.  The second number is the offset between the first
+          flagged instruction and the second flagged instruction, and so on.
+
+     DW_TAG_SUN_memop_info (0x4207)
+
+          This information is emitted for the performance analyzer
+          and identifies memory operations with the types or
+          structure members that they access.  Each tag represents
+	  information about one specific memory instruction
+	  in the code.
+	  
+          The attributes are:
+	  DW_AT_SUN_func_offset       Unsigned Constant
+	  DW_AT_SUN_memop_type_ref    Reference
+	  DW_AT_SUN_profile_id        Unsigned Constant
+	  DW_AT_SUN_memop_signature   Unsigned Constant
+
+	  DW_AT_SUN_func_offset records the offset of the instruction
+	  within the function.
+
+	  DW_AT_SUN_memop_type_ref records a DIE reference
+	  that points to the type of the variable that is being
+	  referenced by this memory instruction. If a structure
+	  member is being accessed, then this is a reference to
+	  the DW_AT_member tag for that member.
+
+	  DW_AT_SUN_profile_id records an opaque number used by
+	  the performance analyzer system.
+
+	  DW_AT_SUN_memop_signature records an opaque number
+	  used by the performance analyzer system.
+	  
+    DW_TAG_SUN_omp_child_func (0x4208)
+
+	  This tag is used to hold a DW_TAG_SUN_omp_child_func
+	  attribute.  You can't have multiple attributes of the
+ 	  same kind attached to the same tag.  So this tag is attached
+	  to a subprogram tag, just so it can hold a single attribute.
+
+    DW_TAG_SUN_rtti_descriptor (0x4209)
+
+	  Data to help dbx understand C++ runtime type information.
+	  I need better description here.  See more information in 
+	  the stabs documentation under RTTI (YR) stabs.
+
+    DW_TAG_SUN_dtor_info (0x420a)
+    DW_TAG_SUN_dtor (0x420b)
+
+	  DW_TAG_SUN_dtor_info
+
+	  Information about which destructors to call when
+	  this function is popped off the stack artifically by a
+	  debugger.  The set of destructors to call is represented 
+	  by a small integer "state" value.  A state value of 0
+	  means no destructors need to be called.
+
+	  DW_TAG_SUN_dtor_info appears inside subroutine dies.  Its only 
+   	  children should be DW_TAG_SUN_dtor dies.  It can have the following 
+	  attributes: 
+		DW_AT_SUN_func_offsets 
+		DW_AT_SUN_state_deltas
+	  The func_offsets attribute stores an array of offsets from
+	  the beginning of the function, (as it does for 
+	  DW_TAG_SUN_codeflags).  The state_deltas attribute stores
+	  an array of signed integers. Each integer is encoded as 
+	  an SLEB which represents the CHANGE in the "state" value 
+	  at the corresponding offset in func_offsets.  Thus, these
+	  attributes represent a mapping from any instruction in
+	  the function to a corresponding state value.
+
+	  These 'state' values are used with the DW_TAG_SUN_dtor
+	  tag information to find which destructors to call.
+
+    	  DW_TAG_SUN_dtor
+
+	  This die represents some code segment in the function
+	  that implements a destructor, either a call or an
+	  inlined code sequence.  Because this code sequence is
+	  described with a location and length, this information 
+	  won't be available from the compiler if the code is 
+ 	  is "scheduled" by an optimizer. (That is, mixed with
+	  other instructions from above and below the original code
+	  sequence.)
+
+	  The attributes of this die will tell the starting and 
+	  ending "states" when running this destructor code.
+	  (See DW_TAG_SUN_dtor_info).  The attributes will also
+	  point to the starting offset and length of the block of
+	  code representing this destructor.
+
+	  Attibutes are:
+		DW_AT_SUN_dtor_start
+		DW_AT_SUN_dtor_length
+		DW_AT_SUN_dtor_state_initial
+		DW_AT_SUN_dtor_state_final
+
+	  To use these two tags when popping a function call from
+	  the stack the debugger should do the following:
+	  1 get the current PC location within the function
+	  2 use this PC to find the current 'state' at that location
+	  3 find the DW_TAG_SUN_dtor info telling you how to
+	    lower the current state value to a smaller number.
+	    NOT ALL integers are used. One record might lower the
+	    state from 5 to 3 and the next from 3 to 2. State 4 might
+	    not be mentioned.
+	  4 Execute the destructor code pointed to by the matching
+  	    DW_TAG_SUN_dtor.
+	  5 lower the current 'state' value, if it isn't 0 go to step 3
+	
+Example for DW_TAG_SUN_dtor_info:
+
+void baz(int * i) { }
+
+#include <stdio.h>
+
+class foo {
+public: int i;
+    foo() { i=3; baz(&i); }
+    ~foo() { i=0; baz(&i); }
+};
+
+int main()
+{
+    foo f1;
+    foo f2;
+    printf("%d %d\n",f1.i,f2.i);
+}
+
+Produces:
+
+<1><  640>      DW_TAG_subprogram
+                DW_AT_name                  main
+...
+<2><  698>      DW_TAG_SUN_dtor_info
+                DW_AT_SUN_func_offsets
+        10       20       60
+                DW_AT_SUN_dtor_state_deltas 02 01 7d
+<3><  708>      DW_TAG_SUN_dtor
+                DW_AT_SUN_dtor_state_initial3
+                DW_AT_SUN_dtor_state_final  2
+                DW_AT_SUN_dtor_start        68
+                DW_AT_SUN_dtor_end          16
+<3><  713>      DW_TAG_SUN_dtor
+                DW_AT_SUN_dtor_state_initial2
+                DW_AT_SUN_dtor_state_final  0
+                DW_AT_SUN_dtor_start        84
+                DW_AT_SUN_dtor_end          12
+
+
+    DW_TAG_SUN_f90_interface (0x420c)
+
+       This is similar to a class tag or a module tag, but it
+       contains a set of declarations that are in a Fortran 90
+       INTERFACE block.  Only interface blocks with names need to
+       be recorded in dwarf.  These represent either generic (that is,
+       overloaded) functions, or else functions that implement operators
+       like = or +.
+
+       Here is an example:
+                DW_TAG_SUN_f90_interface
+                DW_AT_name                  fadd
+                DW_AT_accessibility         DW_ACCESS_public
+                    DW_TAG_imported_declaration
+                        DW_AT_SUN_import_by_lname   vectors.realadd_
+                    DW_TAG_imported_declaration
+                        DW_AT_SUN_import_by_lname   vectors.intadd_
+
+       In theory, we should use DW_AT_import instead of
+       DW_AT_SUN_import_by_lname.  Due to current restrictions in
+       the fortran compiler, we point to the members of such
+       interfaces using the linker name.
+
+    DW_TAG_SUN_fortran_vax_structure (0x420d)
+
+	This tag works the same way as DW_TAG_structure_type in
+	fortran 90, except that structures with this tag come
+	from a different syntax in the source code. Here is an 
+	example of a vax-style structure:
+
+        structure /product/
+           character*8     pname
+           integer*4       id(2)
+        end structure
+
+         
+----------------------------------------------------------------------------
+
+Attributes
+  
+     DW_AT_byte_size
+
+	  This is a dwarf standard attribute which is optional
+	  in those cases where it can be deduced.  At Sun we 
+	  at least one customer who likes to know the size of
+	  (for example) an array of pointers, without needing to
+	  walk the tag-tree in order to calculate it.  But that
+	  customer could probably compensate if this went away.
+
+     DW_AT_SUN_template (0x2201) (Reference)
+
+          This attribute can be given to any C++
+          DW_TAG_structure_type, DW_TAG_union_type,
+          DW_TAG_class_type,  or  DW_TAG_subprogram tag  that
+          represents an instantiation of a C++ template. This
+          attribute should have a reference that will refer to the
+          template definition, e.g. the attribute should refer to
+          one of the tags DW_TAG_SUN_function_template,
+          DW_TAG_SUN_class_template, DW_TAG_SUN_struct_template,
+          or DW_TAG_SUN_union_template.  This attribute provides
+          the connection from the actual  C++ template
+          instantiation, and the template definition.
+          This TAG can get the same attributes as the Standard
+          DW_TAG_class_type.
+
+     DW_AT_SUN_alignment (0x2202) (Unsigned Constant)
+
+          This attribute should be given to any
+          DW_TAG_structure_type, DW_TAG_union_type, or
+          DW_TAG_class_type tag when the default alignment for a
+          variable of this type is non-standard for the hardware.
+          The Sun compilers have a directive "#pragma pack(n)"
+          which changes the default alignment on a type and forces
+          a packing of it's fields to that alignment.  The value
+          for this attribute is a constant which represents the
+          alignment requested by the user in the #pragma pack
+          directive, limited to 1, 2, 4, or 8.
+
+     DW_AT_SUN_vtable (0x2203) (Signed Constant)
+
+          This attribute can be provided on a DW_TAG_class_type
+          which is virtual, in order to provide the Sun C++ ABI
+          offset into the virtual table for this type. It has a
+          constant value which represents a table index.
+
+     DW_AT_SUN_count_guarantee (0x2204) (Unsigned Constant)
+
+          This attribute can be used on a DW_TAG_pointer_type
+          which happens to be the type of a formal argument
+          declared with the C99 syntax to provide a guaranteed
+          number of elements that the pointer refers too. The
+          pointer is actually a reference to an array of objects,
+          and the count guarantee is on how many elements are
+          guaranteed to be available at that address.
+          Used in C99 to indicate that the formal was declared
+          with the C99 syntax that defines this formal to have an
+          array type with a guaranteed minimum number of elements.
+          This attribute should only be placed on
+          DW_TAG_pointer_type's that are the types of
+          DW_TAG_formal_parameter's. Example: void f(int a[static
+          5]){}
+
+     DW_AT_SUN_command_line (0x2205) (String)
+
+          This attribute should only be placed on the
+          DW_TAG_compile_unit and it contains the compile line
+          used to build this compilation unit (object file) as
+          supplied by the compiler.
+
+     DW_AT_SUN_vbase (0x2206) (Signed Constant)
+
+          This attribute is similar to the DW_AT_SUN_vtable, but
+          will only be used on a DW_TAG_inheritance or
+          DW_TAG_SUN_indirect_inheritance and represents an offset
+          into the virtual table.
+
+     DW_AT_SUN_compile_options (0x2207) (String)
+
+          This attribute should only be placed on the
+          DW_TAG_compile_unit and it contains the same information
+          as the Sun Stabs N_OPT stab, a ';' separated series of
+          name=value patterns used to detect various
+          characteristics of the compilation and generated code.
+
+     DW_AT_SUN_language (0x2208) (Unsigned Constant)
+
+          This attribute is used exactly like the DW_AT_language
+          attribute but can be placed on any TAG that needs to be
+          flagged as being marked as using a different language
+          linkage or semantics than the language setting on the
+          DW_TAG_compile_unit.  Normally this will be seen when
+          the C++ source contains the use of 'extern "C" { }'
+          blocks.
+
+     DW_AT_SUN_browser_file (0x2209) (String)
+
+          This attribute should only be placed on the
+          DW_TAG_compile_unit and it contains the same information
+          as the Sun Stabs N_BROWS stab.
+
+     DW_AT_SUN_vtable_abi (0x2210) (Unsigned Constant)
+
+          This attribute should only be placed on a
+          DW_TAG_structure_type, DW_TAG_union_type, or
+          DW_TAG_class_type and will contain the Sun C++ compiler
+          virtual table ABI version for this virtual table.
+
+     DW_AT_SUN_func_offsets (0x2211) (Block)
+
+          This attribute is a generic way to record an array
+          of signed LEB numbers.  It is used by DW_TAG_SUN_codeflags.
+
+     DW_AT_SUN_cf_kind (0x2212) (Unsigned Constant)
+
+          This attribute records the type code for a codeflags
+          block.  See DW_TAG_SUN_codeflags.
+
+     DW_AT_SUN_vtable_index (0x2213) (Signed Constant)
+
+          This attribute should only be placed on a DW_TAG_subroutine for a
+          C++ virtual function and will contain the Sun C++ compiler virtual
+          table index for this method.
+
+     DW_AT_SUN_omp_tpriv_addr (0x2214) (Address)
+
+          This is the address of a pointer-sized variable created
+          by the compiler to implement per-thread copies of the
+          variable with this attribute.  This address is used in
+          an implementation-dependant way by the debugger to access
+          per-thread versions of the variable.  Eventually this
+          mechanism should be replaced by TLS variables which are
+          supported directly by the linker and libthread.
+          Attributes of type "address" are rare in dwarf.  The normal
+          way to refer to another variable is to refer to the DIE
+          (tag) for that variable.  But we don't do it that way
+	  because we don't have that handle handy when generating dwarf.
+          It would have been better to refer to the DIE,
+          then this would be a local DIE reference instead of an addr.
+          And it wouldn't require a linker relocation.
+
+     DW_AT_SUN_omp_child_func (0x2215) (Reference)
+
+          This attribute belongs on a DW_TAG_SUN_omp_child_func die
+	  which is within a function DIE and points to
+          another function DIE that should be considered to have a
+          nested scope within the first function.  This is used
+          to describe the "outlining" of a parallel region that
+          happens as part of OpenMP processing.  The original function
+          with an OpenMP parallel region will end up having one of
+          these tag/attribute pairs which point at the DIE for the 
+ 	  artificial function that will be executed by multiple threads.  
+
+          This probably should be implemented by simply
+          nesting the DW_TAG_subprogram of the outlined function
+          inside the DW_TAG_subprogram of the original function.
+          even though that's not the way the source was written.
+          But I don't know if that will work properly.  This attribute
+          was originally implemented to mimic the way the stabs format
+          describes the same information.  Changing the actual scope
+          of the artificial function would have impacts in
+          the debug generation library and in dbx.
+
+          Since this attribute ocurrs within a DW_TAG_SUN_omp_child_func,
+	  it should probably have been called "DW_AT_SUN_func_ref".
+	  So the attribute could be reused for other purposes.
+
+     DW_AT_SUN_func_offset (0x2216) (Unsigned Constant)
+
+          This attribute is an offset from the low_pc of the function
+	  that contains the tag that contains this attribute.
+	  This is used by DW_TAG_SUN_memop_info, and perhaps other tags
+	  in the future.
+	  
+     DW_AT_SUN_memop_type_ref (0x2217) (Reference)
+
+          This attribute is used by DW_TAG_SUN_memop_info.
+	  For more information see the description of that tag.
+	  
+     DW_AT_SUN_profile_id  (0x2218) (Unsigned Constant)
+     
+          This attribute is used by DW_TAG_SUN_memop_info.
+	  For more information see the description of that tag.
+	  
+     DW_AT_SUN_memop_signature (0x2219) (Unsigned Constant)
+     
+          This attribute is used by DW_TAG_SUN_memop_info.
+	  For more information see the description of that tag.
+
+     DW_AT_SUN_obj_dir (0x2220) (String)
+     DW_AT_SUN_obj_file (0x2221) (String)
+
+          These two attributes can be applied to a
+          DW_TAG_compilation_unit to describe the location and
+          name of the object file that was being created when the
+          dwarf information was generated.  This information is
+          not normally required by a debugger, but it can
+          help to correlate dwarf information between two different
+          versions of the same object file.
+
+          The directory name should not contain a trailing slash
+          character, and the recommended form is the same as for
+          DW_AT_comp_dir, `hostname:path' or `:path'.  In the SUN
+          implementation path should always be a full pathname.
+          DW_AT_obj_file should not contain any '/' characters.
+          The path name might also be relative to the directory
+          in DW_AT_comp_dir.
+
+     DW_AT_SUN_original_name (0x2222) (String)
+
+          This attribute is applied to a compilation unit tag when
+	  the original source file name is not the same as the
+	  source file fed to the compiler.  For example, a user 
+	  preprocesses a .c file into a .i file, then compiles the
+	  .i file.  In this case, the .i file has #line directives
+	  which cause line number information to point to the original
+	  .c file.  But the debugger might require both names to
+	  be available.  If the source file has two names like this
+	  then the DW_AT_name attribute will have the name fed
+	  to the compiler (the .i file) and the DW_AT_SUN_original_name
+	  will have the original name of the source file (the .c file).
+	  The same mechanism should apply to yacc and lex files.
+
+     DW_AT_SUN_amd64_parmdump (0x2224) (Flag)
+
+	  Used to indicate that a special compiler code generation
+	  flag has been used to dump the function parameters into
+	  a known location on the amd64 architecture.  Used by the
+	  Solaris group.
+
+     DW_AT_SUN_part_link_name (0x2225) (String)
+     DW_AT_SUN_link_name (0x2226) (String)
+
+	  These attributes are used to record the linker name 
+	  for C++ symbols which cannot be pointed at using
+	  their addresses.  If the compiler can place the 
+	  address of a symbol into the die then you can find
+	  the linker name by looking up the address in the 
+	  symbol table.  But for externals, we must record
+	  the linker name.   DW_AT_SUN_part_link_name is used
+	  to record a partial linker name that can be combined
+	  with the partial or complete names of the containing
+	  scopes to determine the complete linker name.  This
+	  technique is used to save space, because linker names
+	  can be very long.
+
+	  For the most recent Sun C++ ABI, the partial names
+	  work like this:  (The parens are for grouping only)
+
+	__1X(A)_      mangled name of parent  "A"
+	__1Y(A)(B)_   mangled name of child   "B"
+		      X is the symbol type of A
+		      Y is the symbol type of B
+	Y(B)	      partial name of child
+
+	In order to take "__1X(A)_" plus "Y(B)" and create
+	"__1Y(A)(B)_" do this:
+
+	In the new name, use the "symbol type" character from the child
+	Insert the child name after the parent name and before
+	the underscore character.  Note:  The (A) and (B) names
+	may include length-encoding characters, so they might
+	not be the exact same name as the user-visible name.
+	
+
+	
+	  
+     DW_AT_SUN_pass_with_const (0x2227) (String)
+     DW_AT_SUN_return_with_const (0x2228) (String)
+
+
+Some kinds of C++ classes (called "non-trivial" classes by the standard)
+cannot be bit-wise copied transparently.  If you try to
+pass such an object by value (or return it by value) then the ABI
+will often move it to a place on the stack, or pass it by value
+inside a register.
+
+Aside: The problem in C++ is because when certain methods are
+called, the object is passed its own address (this).  If this
+address is stored or passed to other functions, then you can't
+relocate the object.  So once you call a method on a class
+like that you can't move its location. (End Aside)
+
+The C++ compiler works around this problem by converting the
+pass-by-value/return-by-value" to a pass-by-reference
+or a return-by-reference.   That kind of conversion is the same
+kind of conversion that the ABI would *sometimes* do, according
+to its own rules.
+
+One flag marks classes that always have to be passed by value. The
+other flag marks classes that always have to returned by value.
+Currently both flags are turn on or off together, but Lawrence tells
+me that future C++ ABI's might want to have separate control of
+those two things.
+
+So in dwarf, we will need to add two boolean attributes that can be
+attached to class TAG's.  One to mark "must-pass-by-ref" one that marks
+"must-return-by-ref".
+
+Notes on other ways to handle this information
+----------------------------------------------
+
+(What follows are implemnentation notes, and don't describe
+ the Sun implementation currently.)
+
+Another alternative is to mark the parameter itself in the definition
+of the function.  We could mark it with a special "by-ref" flag,
+or we could just mark the parameter with the register that
+holds the address of the value.  For issues that are very subtle,
+I like the mechanism to be as explicit as possible.  It seems like
+good usability design.
+
+In theory, the DW_AT_location is supposed to tell us exactly where
+the parameter is (and we could extend the return value to be
+described with a DW_AT_location).  It allows for an arbitrarily complex
+expression describing registers, offset and dereferencing.
+But the DW_AT_location expressions are designed to tell the debugger
+how to *extract* a value, not how to generate it for a call.   Dbx still
+depends almost exclusively on the ABI to tell us how to generate parameters
+for a call, it's probably too much to ask dbx to start grokking
+all DW_AT_location values for purposes of making calls to functions.
+
+So there are two approaches:
+1. Mark each call with all the info needed to call it.
+   (This requires dbx to depend much more on DW_AT_locations)
+2. Assume that the ABI is almost always correct, and give
+   additional information to dbx when to "override" the ABI.
+
+
+
+     DW_AT_SUN_import_by_name (0x2229) (flag)
+
+         Used with C++ to name a module that is imported at
+         the current location, but where the definition for this
+         module is not emitted within this compilation unit.
+         This situation occurs because the Sun C++ compiler
+         does not generate information for types that are not
+         used in the current compilation unit.
+         
+     DW_AT_SUN_f90_pointer    (0x222a) (flag)
+
+         Used to mark Fortran 90 symbols that have the POINTER attribute.
+         This is used instead of DW_AT_allocated and DW_AT_associated
+         Note: About cray style pointers in fortran.  The Sun compilers and
+         dbx treat the pointer as an integer, and the pointee is not
+         given any special attribute.  There is no binding recorded
+         in dwarf to connect the pointer and the pointee.  Use f90
+         pointers in your program instead.
+
+     DW_AT_SUN_pass_by_ref    (0x222b) (flag)
+
+         Used to mark fortran parameters which are pessed by reference.
+         C parms, C++ parms, and Fortran pass-by-value "dummy arguments"
+         (that is, function parameters) have this set to false or missing.
+         That is: missing is the same as false.
+
+     DW_AT_SUN_f90_allocatable (0x222c) (flag)
+
+         Used to mark Fortran 90 symbols that have the ALLOCATABLE attribute.
+         This is used instead of DW_AT_allocated and DW_AT_associated.
+
+     DW_AT_SUN_f90_assumed_shape_array (0x222d) (flag)
+
+         Used to mark Fortran 90 dummy arguments that are arrays
+         without any specified shape.
+         This is used instead of DW_AT_allocated and DW_AT_associated.
+
+     DW_AT_SUN_c_vla (0x222e) (flag)
+
+         Used with C Variable Length Arrays (VLAs)
+         Formerly we used DW_AT_allocated.  That was incorrect.
+
+     (0x222f) - unused
+
+
+     DW_AT_SUN_return_value_ptr (0x2230) (flag)
+
+         This flag is used (currently only in fortran) to mark an
+         artificial parameter that is used to pass a pointer
+         into a function, where this pointer points to a location
+         to store the return value for the function.
+
+     DW_AT_SUN_dtor_start           	(0x2231) (function offset)
+     DW_AT_SUN_dtor_length 		(0x2232) (unsigned integer)
+     DW_AT_SUN_dtor_state_initial 	(0x2233) (signed integer)
+     DW_AT_SUN_dtor_state_final 	(0x2234) (signed integer)
+     DW_AT_SUN_dtor_state_deltas 	(0x2235) (block, array of SLEBs)
+
+	These attributes are used with DW_TAG_SUN_dtor_info and
+	DW_TAG_SUN_dtor.  For usage information see the description
+	of those tags.
+
+     DW_AT_SUN_import_by_lname          (0x2236) (string, linker name)
+
+        This is just like DW_AT_SUN_import_by_name, only the name
+        is a linker name instead of a user name.
+
+     DW_AT_SUN_f90_use_only             (0x2237) (flag)
+
+        Can only appear on a DW_TAG_imported_module in a Fortran 90 program.
+        This attribute is present and true if the associated tag represents
+        an F90 use statement containing the ONLY keyword.
+
+     DW_AT_SUN_namelist_spec		(0x2238) (string)
+
+	Used to record the comma separated list of variable names
+	in a namelist statement.  
+
+	According to dwarf standard, a DW_TAG_namelist_item should
+	have an attribute that points to the die for the variable
+	that is in the namelist.  But Sun's fortran compiler doesn't
+	feed us the corresponding DbgSymID, it just gives us the
+	string used on the namelist statement.  So instead of
+	a bunch of namelist_item's we just attach a single spec string.
+
+	So, not this:
+	<642>   DW_TAG_variable
+           	   DW_AT_name                  a
+           	   DW_AT_declaration           yes(1)
+	<657>   ...
+        	DW_TAG_namelist
+           	   DW_AT_name                  xx
+           	   DW_TAG_namelist_item
+               	      DW_AT_namelist_item     <642>
+           	   DW_TAG_namelist_item
+               	      DW_AT_namelist_item     <657>
+           	   ...
+	
+	Instead we do this:
+        	DW_TAG_namelist
+           	   DW_AT_name                  xx
+           	   DW_AT_SUN_namelist_spec     a,b,c
+
+     DW_AT_SUN_is_omp_child_func             (0x2239) (flag)
+
+	This flag is valid only on DW_TAG_subprograms
+	dies.  It is present and set to true if the current function
+	is an OpenMP child function.  All such children dies are
+	expected to be nested within the dies that represent
+	the function from which they were extracted by the compiler.
+	This information is an alternate for the following:
+		DW_AT_SUN_omp_child_func
+		DW_TAG_SUN_omp_child_func
+	For now, I left in both styles of information, but I will
+	eventually phase out the above to values in favor
+	of DW_AT_SUN_is_omp_child_func.
+
+     DW_AT_SUN_fortran_main_alias            (0x223a) (flag)
+
+	This is duplicate information for connecting the
+	"main" function (which is always called MAIN) to
+	it's user-defined alias (the name specified in the fortran 
+	PROGRAM statement).  This same alias is also specified 
+	by using the DW_TAG_imported_declaration, but using a 
+	direct attribute is much simpler.  (Also the fortran
+	compiler doesn't give us a direct pointer from the alias
+	to the MAIN symbol, so we end up emitting an extra declaration
+	for now, when we use the "Standard" dwarf mechanism.)
+	Here is the alternative to using this attribute:
+
+<1><  614>      DW_TAG_imported_declaration
+                   DW_AT_name                  tst
+                   DW_AT_import                <627>
+                   DW_AT_sibling               <636>
+<2><  627>      DW_TAG_subprogram			<-- unneeded decl
+                   DW_AT_name                  MAIN
+                   DW_AT_declaration           yes(1)
+                   DW_AT_external              yes(1)
+<1><  636>      DW_TAG_subprogram			<-- preferred target
+                   DW_AT_name                  MAIN         of DW_AT_import
+
+
+     DW_AT_SUN_fortran_based               (0x223b) (flag)
+
+        This flag is present and true on a DW_TAG_variable when
+        that variable is a Fortran based variable (like a Cray-style
+        pointer).  Any location attached to such a variable is
+        expected to be the same location as another INTEGER variable.
+	This integer variable can be assigned a block of heap memory
+        which will have the side-effect of creating backing store
+        for the BASED variable.  TODO I would prefer to have
+        an attribute that points directly the tag representing the
+	underlying "Storage" variable, but the f90 front end doesn't give us
+	the information needed for that yet.
+	
+
+
+----------------------------------------------------------------------------
+
+Basic Types
+
+     DW_ATE_SUN_interval_float (0x91)
+
+          This extension allows for the Sun "interval" types.
+
+     DW_ATE_SUN_imaginary_float (0x92)
+
+          This extension allows for the  C99 basic type of
+          "imaginary".
+
+----------------------------------------------------------------------------
+
+Languages
+
+     DW_LANG_SUN_Assembler (0x9001)
+
+          This language setting has been made explicit with the
+          SUN compilers rather than use the "unknown" language
+          value. There has been some indication that the Sun
+          assembler might generate source level debug information
+          on assembly and it was felt this might be needed.
+
+----------------------------------------------------------------------------
+
+Code Flags
+
+     These type codes (kinds) are used to define different kinds
+     of instruction attributes in a codeflags entry.
+     See 
+
+     The DW_TAG_SUN_codeflags tag is used to record boolean attributes
+     about individual instructions in a function.  Each codeflags tag
+     sets a specific boolean attribute on a list of instructions.
+     This is a list of possible types for a DW_TAG_SUN_codeflags tag.
+     These are possible values for the DW_AT_SUN_cf_kind attribute
+     of the DW_TAG_SUN_codeflags tag.
+
+     Note: If DW_TAG_SUN_codeflags is accepted as a dwarf standard, then
+     standard dwarf ATCF entries should start at 0x01
+
+     Note: cf_kind names which contain "_mop_" are markers for
+     [M]emory [OP]erations.  This information is used for
+     memory access checking functionality. (Sun dbx RTC)
+
+     DW_ATCF_SUN_mop_bitfield (0x41)
+
+          Marks a bitfield load which might read data from
+          memory that hasn't been initialized to a known value.
+
+     DW_ATCF_SUN_mop_spill (0x42)
+
+          Marks reads and writes that are used to spill scalar
+          and floating point registers to the stack.
+
+     DW_ATCF_SUN_mop_scopy (0x43)
+
+          This code flag maps to the Stabs N_PATCH or
+          N_CODETAG stabs. It is used to mark the load or store of
+          a structure.
+
+     DW_ATCF_SUN_func_start (0x44)
+
+          This code flag maps to the Stabs N_PATCH or
+          N_CODETAG stabs. It is used to mark the beginning of the
+          user instructions of a function (past all the invisible
+          function setup code and frame setup).
+
+     DW_ATCF_SUN_end_ctors (0x45)
+
+          This code flag maps to the Stabs N_PATCH or
+          N_CODETAG stabs. It is used to mark the beginning of the
+          instructions of a function (past all the super
+          constructor calls).
+
+     DW_ATCF_SUN_branch_target (0x46)
+
+          This code flag marks instructions which are the target
+          of branch instructions.
+
+     DW_ATCF_SUN_mop_stack_probe (0x47)
+
+          This code flag marks special memory probe instructions
+          which are used to check stack boundaries by.
+
+
+----------------------------------------------------------------------------
+
+
+LEGAL NOTICE:
+
+
+Copyright 2003 Sun Microsystems, Inc. 
+4150 Network Circle, Santa Clara, U.S.A. 95054
+All rights reserved. 
+
+NOTICE 
+The Specification is protected by copyright and the information
+described therein may be protected by one or more U.S. patents,
+foreign patents, or pending applications.  Except as provided
+under the following license, no part of the Specification may
+be reproduced in any form by any means without the prior written
+authorization of Sun Microsystems, Inc. ("Sun") and its licensors,
+if any.  Any use of the Specification and the information described
+therein will be governed by the terms and conditions of this license.
+By viewing, downloading or otherwise copying the Specification,
+you agree that you have read, understood, and will comply with all
+of the terms and conditions set forth herein. 
+
+Sun hereby grants you a fully-paid, non-exclusive, non-transferable,
+worldwide, limited license (without the right to sublicense), under
+Sun's intellectual property rights that are essential to practice
+the Specification, to (a) distribute the Specification complete,
+unmodified and under the terms of this license; and (b) internally
+practice the Specification solely for the purpose of creating a
+clean room implementation of the Specification that: (i) includes
+a complete implementation of the current version of the Specification,
+without subsetting or supersetting; (ii) implements all of the
+interfaces and functionality of the Specification, as defined by Sun,
+without subsetting or supersetting; (iii) includes a complete
+implementation of any optional components (as defined by Sun in the
+Specification) which you choose to implement, without subsetting or
+supersetting; (iv) does not derive from any Sun source code or binary
+code materials; and (v) does not include any Sun source code or binary
+code materials without an appropriate and separate license from Sun.
+The Specification contains the proprietary information of Sun and may
+only be used in accordance with the license terms set forth herein.
+This license will terminate immediately without notice from Sun if
+you fail to comply with any provision of this license.   Upon
+termination or expiration of this license, you must cease use of or
+destroy the Specification. 
+
+TRADEMARKS 
+No right, title, or interest in or to any trademarks, service marks,
+or trade names of Sun or Sun's licensors is granted hereunder.  Sun,
+Sun Microsystems, the Sun logo, Java, Jini, J2EE, JavaServerPages,
+Enterprise JavaBeans, JavaCompatible, JDK, JDBC, JavaBeans, JavaMail,
+Write Once, Run Anywhere, and Java Naming and Directory Interface
+are trademarks or registered trademarks of Sun Microsystems, Inc.
+in the U.S. and other countries. 
+
+DISCLAIMER OF WARRANTIES 
+THE SPECIFICATION IS PROVIDED "AS IS".  SUN MAKES NO REPRESENTATIONS
+OR WARRANTIES, EITHER EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED
+TO, WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE,
+OR NON-INFRINGEMENT THAT THE CONTENTS OF THE SPECIFICATION ARE
+SUITABLE FOR ANY PURPOSE OR THAT ANY PRACTICE OR IMPLEMENTATION OF
+SUCH CONTENTS WILL NOT INFRINGE ANY THIRD PARTY PATENTS, COPYRIGHTS,
+TRADE SECRETS OR OTHER RIGHTS.  This document does not represent any
+commitment to release or implement any portion of the Specification
+in any product. 
+
+THE SPECIFICATION COULD INCLUDE TECHNICAL INACCURACIES OR
+TYPOGRAPHICAL ERRORS.  CHANGES ARE PERIODICALLY ADDED TO THE
+INFORMATION THEREIN; THESE CHANGES WILL BE INCORPORATED INTO NEW
+VERSIONS OF THE SPECIFICATION, IF ANY.  SUN MAY MAKE IMPROVEMENTS
+AND/OR CHANGES TO THE PRODUCT(S) AND/OR THE PROGRAM(S) DESCRIBED
+IN THE SPECIFICATION AT ANY TIME.  Any use of such changes in the
+Specification will be governed by the then-current license for the
+applicable version of the Specification. 
+
+LIMITATION OF LIABILITY 
+TO THE EXTENT NOT PROHIBITED BY LAW, IN NO EVENT WILL SUN OR ITS
+LICENSORS BE LIABLE FOR ANY DAMAGES, INCLUDING WITHOUT LIMITATION,
+LOST REVENUE, PROFITS OR DATA, OR FOR SPECIAL, INDIRECT,
+CONSEQUENTIAL, INCIDENTAL OR PUNITIVE DAMAGES, HOWEVER CAUSED AND
+REGARDLESS OF THE THEORY OF LIABILITY, ARISING OUT OF OR RELATED TO
+ANY FURNISHING, PRACTICING, MODIFYING OR ANY USE OF THE SPECIFICATION,
+EVEN IF SUN AND/OR ITS LICENSORS HAVE BEEN ADVISED OF THE POSSIBILITY
+OF SUCH DAMAGES. 
+
+You will indemnify, hold harmless, and defend Sun and its licensors
+from any claims arising or resulting from: (i) your use of the
+Specification; (ii) the use or distribution of your clean room
+implementation and/or Specification; and/or (iii) any claims that
+later versions or releases of any Specification furnished to you
+are incompatible with the Specification provided to you under this
+license. 
+
+RESTRICTED RIGHTS LEGEND 
+U.S. Government:  If this Specification is being acquired by or on
+behalf of the U.S. Government or by a U.S. Government prime contractor
+or subcontractor (at any tier), then the Government's rights in
+the Software and accompanying documentation shall be only as set
+forth in this license; this is in accordance with 48 C.F.R. 227.7201
+through 227.7202-4 (for Department of Defense (DoD) acquisitions) and
+with 48 C.F.R. 2.101 and 12.212 (for non-DoD acquisitions).  
+
+REPORT 
+You may wish to report any ambiguities, inconsistencies or
+inaccuracies you may find in connection with your use of the
+Specification ("Feedback"). To the extent that you provide Sun
+with any Feedback, you hereby: (i) agree that such Feedback is
+provided on a non-proprietary and non-confidential basis, and (ii)
+grant Sun a perpetual, non-exclusive, worldwide, fully paid-up,
+irrevocable license, with the right to sublicense through multiple
+levels of sublicensees, to incorporate, disclose, and use without
+limitation the Feedback for any purpose related to the Specification
+and future versions, implementations, and test suites thereof. 
+
+EXPORTS
+The Specifciation under this license are subject to U.S. export
+control laws and may be subject to export or import regulations
+in other countries. You agree to comply strictly with all such laws
+and regulations and acknowledge that you have the responsibility to
+obtain such licenses to export, re-export or import as may be
+required after delivery to you.   Unless authorized by the U.S.
+Government, you will not, directly or indirectly, export or re-export
+Specification, nor direct products therefrom, to any embargoed or
+restricted country identified in the U.S. export laws, including but
+not limited to the Export Administration Regulations
+(15 C.F.R. Parts 730-774).  You affirm that you are not identified
+on any U.S. Government export exclusion lists and that you will not
+use the Specification for nuclear missile, chemical biological
+weaponry, or other weapons of mass destruction.
+
+GOVERNING LAW
+Any action related to this license will be governed by California
+law and controlling U.S. federal law. No choice of law rules of any
+jurisdiction will apply.
+
+INTEGRATION
+This license is the entire agreement between you and Sun relating to
+its subject matter. It supersedes all prior or contemporaneous oral
+or written communications, proposals, representations and warranties
+and prevails over any conflicting or additional terms of any quote,
+order, acknowledgment, or other communication between the parties
+relating to its subject matter during the term of this license.
+No modification of this license will be binding, unless in writing
+and signed by an authorized representative of each party.
+
+NO ASSIGNMENT
+This license may not be sold, leased, assigned, or otherwise
+transferred without the prior written consent of Sun. 
+
+
+
+
+
+----------------------------------------------------------------------------
+
+Last updated on 11/06/06
+
+
