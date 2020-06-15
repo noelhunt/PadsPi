@@ -1,0 +1,35 @@
+A version of Tom Cargill's 'process inspector' which can read dwarf
+symbol tables.
+
+'Pi' originally appeared in Eighth Edition Unix, around 1985. This
+version was designed to read COFF object files and extract stabs
+information for debugging.  Pi has a graphical interface which is
+provided by 'pads'. The original pads was built against the Blit/Jerq
+graphics model, and the version I have developed uses the very similar
+model available in the Plan9 graphics libraries available in Russ Cox's
+Plan9port.
+
+I have used the extremely elegant dwarf-parsing code written by Russ
+Cox.  It is far superior to the commonly used 'libdwarf' library.  Some
+modifications were made to the code because 'pi' is written in C++, but
+these might seem gratuitous to the original author.
+
+In around 2002, Dave Kapilow released a CD containing much later
+versions of pads and pi, which appear to have been his own work. Dave
+Kapilow was at Bell Laboratories when Tom Cargill was, and I think he
+kept up the development of pi after Tom Cargill left. Of particular use
+to me was his version of pi that was built for Sunos 5.1, using stabs
+for the symbol table, and /proc for debugging running processes. The
+/proc interface has not changed remarkably from Sunos 5.1 to Sunos
+5.11, so that the version offered here uses /proc.
+
+I have no idea what /proc is like in Linux, but I don't imagine it is
+so far different that the code couldn't be ported to Linux with little
+effort. And since Dwarf is presumably Dwarf everywhere, that code
+should also work as it is.
+
+The `doc' subdirectory contains the manual entry for `pi', and troff
+source for two papers Tom Cargill wrote, one, a user manual of sorts
+for `pi', called `The Feel of Pi', and the other, a case study of
+object-oriented programming as evinced in the design and writing of
+`pi'.
