@@ -117,7 +117,7 @@ TimedOut:
 }
 
 void DelLine( Line *l ){
-	assert( l && l->down && l->up );
+	assert( l && l->down && l->up, "DelLine" );
 
 	if( Selected.line == l ) Selected.line = 0;
 	l->down->up = l->up;
@@ -129,7 +129,7 @@ void DelLine( Line *l ){
 Line *InsAbove(Line *l, Line *t){
 	Line *n;
 
-	assert( l && l->down && l->up );
+	assert( l && l->down && l->up, "InsAbove"  );
 	if( !t->text ) return 0;		/* || !t->text[0] allow */
 	n = salloc(Line);
 	*n = *t;
@@ -144,7 +144,7 @@ Line *InsAbove(Line *l, Line *t){
 Line *InsPos(Pad *p, Line *tk){
 	Line *l = &p->sentinel;	
 
-	assert( p && tk );
+	assert( p && tk, "InsPos" );
 	if( (p->attributes&SORTED) && tk->text ){
 		while( ISLINE(l->up,p) && !dictorder(l->up->text,tk->text) )
 			l = l->up;
@@ -194,7 +194,7 @@ void PutLine( Pad *p, Protocol op ){
 		rcvd.key = ++prevrcvd.key;
 	else {
 		rcvd.key = RcvLong();
-		rcvd.carte = RcvShort();
+		rcvd.carte = RcvLong();
 		rcvd.attributes = RcvShort();
 		prevrcvd = rcvd;
 	}
@@ -332,7 +332,7 @@ void P_Define( Pad *p, long o ){
 }
 
 void P_Carte( Pad *p ){
-	Index i = RcvShort();
+	Index i = RcvLong();
 	if( p && p->object ) p->carte = i;
 }
 
@@ -420,7 +420,7 @@ void MakeGap(Pad *p){
 		if( l->key >= k ) l->key += gap;
 }
 
-# undef PROTODEBUG
+# define PROTODEBUG
 
 # ifdef PROTODEBUG
 char *OpToStr(Protocol op){
@@ -977,7 +977,7 @@ void FoldToggle(Attrib *a){
 Entry *FoldEntry(Attrib *a){
 	static Entry e = { 0, FoldToggle, 0 };
 
-	assert(Current);
+	assert(Current, "FoldEntry");
 	if( ( (*a&(TRUNCATE|FOLD)) ? *a : Current->attributes )&TRUNCATE )
 		e.text = "fold",	  NewFold = FOLD;
 	else

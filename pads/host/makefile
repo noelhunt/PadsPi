@@ -3,8 +3,8 @@ MALLOC=malloc.o
 MALLOC=
 OFILES=cache.o lib.o pad.o popen.o term.o menu.o remote.o \
 	sf.o padrcv.o stats.o help.o trace.o popen.o $(MALLOC)
-CFLAGS=-I. -I.. -I$(HOME)/include -g -DBINCTOR -DTRACE2
-CFLAGS=-I. -I.. -g -DTRACE
+CFLAGS=-I. -I.. -I$(HOME)/include -g
+CFLAGS=-I. -I.. -g -erroff=badinitstr
 CC=CC
 LIB=libpads.a
 LIBDIR= $(HOME)/lib
@@ -18,7 +18,7 @@ ${LIB}: ${OFILES}
 ${OFILES}: ../pads.h
 
 trace.o: trace.c
-	cc ${CFLAGS} -c trace.c
+	cc -g -c trace.c
 
 malloc.o: malloc.c
 	cc ${CFLAGS} -c malloc.c

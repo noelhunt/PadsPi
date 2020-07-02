@@ -7,7 +7,7 @@ Index ZIndex;
 
 Menu::Menu() { list = 0; size = 0; }
 
-Menu::Menu(const char *t, Action a, long o){
+Menu::Menu(char *t, Action a, long o){
 	trace( "0x%08x.Menu(%s,%d,%d)", this, t, a, o );
 	list = 0;
 	size = 0;
@@ -23,14 +23,14 @@ Menu::~Menu(){
 	}
 }
 
-void Menu::first(const char *t, Action a, long o){
+void Menu::first(char *t, Action a, long o){
 	trace( "0x%08x.first(%s,%d,%d)", this, t, a, o );
 	if (size == MAXMENUSIZE)
 		return;
 	first( ICache->place( Item(t,a,o) ) );
 }
 
-void Menu::last(const char *t, Action a, long o){
+void Menu::last(char *t, Action a, long o){
 	trace( "0x%08x.last(%s,%d,%d)", this, t, a, o );
 	if (size == MAXMENUSIZE)
 		return;
@@ -38,7 +38,7 @@ void Menu::last(const char *t, Action a, long o){
 }
 
 void Menu::first(Index i){
-	trace( "0x%08x.first(%u)", this, i.sht() );
+	trace( "0x%08x.first(%u)", this, i.indx );
 	if( i.null() || size == MAXMENUSIZE )
 		return;
 	list = new IList(i,list);
@@ -48,7 +48,7 @@ void Menu::first(Index i){
 void Menu::last(Index i){
 	IList *l;
 
-	trace( "0x%08x.last(%u)", this, i.sht() );
+	trace( "0x%08x.last(%u)", this, i.indx );
 	if( i.null() || size == MAXMENUSIZE )
 		return;
 	++size;
@@ -61,11 +61,11 @@ void Menu::last(Index i){
 }
 
 int IndexTextCmp( Index a, Index b ){
-	trace( "IndexTextCmp(%u,%u)", a.sht(), b.sht() );
+	trace( "IndexTextCmp(%u,%u)", a.indx, b.indx );
 	return strcmp( ICache->take(a)->text, ICache->take(b)->text );
 }
 
-void Menu::sort(const char *t, Action a, long o ){
+void Menu::sort( char *t, Action a, long o ){
 	int cmp;
 	IList **p;
 
@@ -78,7 +78,7 @@ void Menu::sort(const char *t, Action a, long o ){
 		return;
 	}
 	for( p = &list; *p; p = &((*p)->next) ){
-		trace( "%u", (*p)->index.sht() );
+		trace( "%u", (*p)->index.indx  );
 		cmp = IndexTextCmp( i, (*p)->index );
 		if( cmp == 0 ) return;
 		if( cmp < 0 ) break;
@@ -87,7 +87,7 @@ void Menu::sort(const char *t, Action a, long o ){
 	*p = new IList(i,*p);
 }
 
-Index Menu::index(const char *t, Action a, long o){
+Index Menu::index(char *t, Action a, long o){
 	IList *l;
 	int i;
 	Carte *c;
@@ -115,6 +115,6 @@ void Menu::dump(){
 
 	trace( "0x%08x.dump()", this );
 	for( l = list; l; l = l->next ){
-		trace( "%u", l->index.sht() );
+		trace( "%u", l->index.indx );
 	}
 }

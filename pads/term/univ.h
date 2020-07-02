@@ -12,9 +12,8 @@
 #ifdef assert
 #undef assert
 #endif
-long assertf();
-#define assert(e) ( assertf( (long) (e) ) )
-#define salloc(s) ((struct s*) Alloc(sizeof(struct s)) )
+#define assert(e,b)	( assertf( (long) (e), (b) ) )
+#define salloc(s)	((struct s*) Alloc(sizeof(struct s)) )
 #define ISPAD(p)	((p) != &Sentinel)
 #define ISLINE(l,p)	((l) != &(p)->sentinel)	/* used how much? */
 
@@ -278,7 +277,7 @@ void ALARMServe(void);
 void waitMOUSE(void);
 char *itoa(int);
 int dictorder(char*, char*);
-long assertf(long);
+long assertf(long,char*);
 Point dxordy(Point);
 Rectangle boundrect(Rectangle, Rectangle);
 Rectangle scrollbar(Rectangle, int, int, int, int);

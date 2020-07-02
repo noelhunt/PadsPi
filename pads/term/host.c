@@ -116,8 +116,8 @@ void ProtoErr(char *s){
 	extern char KBDStr[];
 	char *k = KBDStr, *p = "protocol: ";
 
-	while( *s ) *k++ = *s++;
 	while( *p ) *k++ = *p++;
+	while( *s ) *k++ = *s++;
 	for(;;){
 		PaintKBD();
 		if( k<&KBDStr[64] ) *k++ = GetRemote()&0x7F;

@@ -35,20 +35,25 @@ void PaintAssert(char *msg, Rectangle r, Image *back, Image *text, Image *bord){
         string(screen, addpt(r.min, Pt(GAP*2,GAP*2)), text, ZP, font, msg);
 }
 
-long assertf(long l){
+long assertf(long l, char *s){
 	int wide;
 	Point p;
 	Rectangle r;
 	Image *back, *bord;
-	char *s = "Assertion failed.";
+	char buf[64], *bp;
+	char *t = "Assertion failed: ";
 	if( l ) return l;
 	back = allocimage(display, Rect(0,0,1,1), screen->chan, 1, DRed);
 	bord = allocimage(display, Rect(0,0,1,1), screen->chan, 1, DGreen);
 	p = mouse->xy; p.x = min(p.x, screen->r.min.x-300);
 	p = Pt(10,10);
-	wide = stringwidth(font, s)+GAP*4;
+	wide = stringwidth(font,t)+stringwidth(font,s)+GAP*4;
 	r = rectaddpt( Rect(0,0,wide,font->height+GAP*4), p );
-	PaintAssert(s, r, back, display->white, bord);
+	bp = buf;
+	while( *t ) *bp++ = *t++;
+	while( *s ) *bp++ = *s++;
+	*bp = 0;
+	PaintAssert(buf, r, back, display->white, bord);
 	flushimage(display, 1);		/* in case display->locking is set */
 	sleep( 5 SECONDS );
 	abort();

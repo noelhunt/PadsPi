@@ -1,6 +1,7 @@
 CC=CC
 CCC=cc
-CFLAGS=-I. -I.. -g -DTRACE #-DUMEM_DEUBG
+CFLAGS=-I. -I.. -g -erroff=badinitstr
+CCFLAGS=-I. -I.. -g
 LIB=../host/libpads.a
 UMEM_DEBUG=default
 UMEM_LOGGING=contents,fail
@@ -10,9 +11,9 @@ TARGETS= alloc gcalloc middle null now news misc \
 
 all: $(TARGETS)
 
-alloc:	   alloc.c;  $(CCC) $(CFLAGS) alloc.c -o $@
-gcalloc: gcalloc.c;  $(CCC) $(CFLAGS) gcalloc.c -o $@
-needs:	   needs.c;  $(CCC) $(CFLAGS) needs.c -o $@
+alloc:	   alloc.c;  $(CCC) $(CCFLAGS) alloc.c -o $@
+gcalloc: gcalloc.c;  $(CCC) $(CCFLAGS) gcalloc.c -o $@
+needs:	   needs.c;  $(CCC) $(CCFLAGS) needs.c -o $@
 
 middle    :  ${LIB} middle.o      ;  $(CC) middle.o -o $@ ${LIB}
 middle.o  :  story.h storyopen.c
@@ -30,5 +31,7 @@ test      :  ${LIB} test.o        ;  $(CC) test.o -o $@ ${LIB}
 clean: ; rm -f $(TARGETS) *.o a.out core
 
 ${LIB}: frc ; cd ../host; $(MAKE)
+
+install:
 
 frc:

@@ -10,7 +10,7 @@ enum {
 	BLACKBORDER =  2,	/* width of outlining border		*/
 	BORDER      =  2,	/* outside to selection boxes		*/
 	DELTA       =  6,
-	DISPLAY     = 13,
+	DISPLAY     = 15,
 	GULLY       =  4,	/* between text and scroll bar		*/
 	MARGIN      =  3,	/* outside to text			*/
 	MAXDEPTH    = 16,
@@ -125,7 +125,7 @@ void PaintEntry(Image *b, Entry *e, Rectangle r, int flag, int charswide){
 		Point qq = Pt(r.max.x-ARROWSIZE,q.y+1);
 		if( !bb ){
 			bb = allocimage(display, s, GREY1, 0, DBlack);
-			assert(bb);
+			assert(bb, "ScriptHit allocimage");
 			loadimage(bb, s, arrowdata, sizeof arrowdata);
 		}
 		if( bb ){
@@ -148,6 +148,7 @@ Entry *ScriptHit(Script *sh, int but, RectList *rl){
 	register Script *m;
 	register Entry *e;
 	RectList lrl, *l;
+	int scrolling;
 	Mousectl *mc = mousectl;
 	struct info old = {0,0};
 	struct info new = {0,0};
@@ -175,11 +176,13 @@ Entry *ScriptHit(Script *sh, int but, RectList *rl){
 	if( items == 0 ) return 0;
 	width = charswide*CHARWIDTH+RMARGIN;
 	sro.x = sro.y = src.x = tro.x = mro.x = mro.y = 0;
+	scrolling = 0;
 	if( items <= MAXUNSCROLL ) lines = items;
 	else {
 		lines = DISPLAY;
 		tro.x = src.x = BARWIDTH;
 		sro.x = sro.y = 1;
+		++scrolling;
 	}
 # ifdef AGH
 	tro.y = ASCEND;
@@ -210,7 +213,7 @@ Entry *ScriptHit(Script *sh, int but, RectList *rl){
 PaintMenu:
 	draw(b, insetrect(mr, BORDER), menucols[BACK], nil, ZP);
 	top = newtop;
-	if( items > DISPLAY ){
+	if( items >= DISPLAY ){
 		baro.y = scale(top, 0, items, sro.y, src.y);
 		baro.x = sro.x;
 		barc.y = scale(top+DISPLAY, 0, items, sro.y, src.y);
@@ -269,7 +272,7 @@ PaintMenu:
 			e = hit>=0 ? EntryGen(hit+top, sh) : 0;
 		}
 		if( !ptinrect(p, mr) ){
-			assert(!e);
+			assert(!e, "ScriptHit non-null entry");
 			for( l = rl; l; l = l->more )
 				if( ptinrect(p, *l->rp) )
 					goto Done;

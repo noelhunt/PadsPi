@@ -7,7 +7,7 @@ OBJSO=fig1.so fig2.so fig3.so
 all:V:	obj.out
 
 obj.out:D:	obj.ms $REF $OBJSO
-	cat ../ADM/bm.mac obj.ms | $PREFER | pic | troff -mpm | ../ADM/bm.sh > $target
+	cat ../ADM/bm.mac obj.ms | $PREFER | /plan9/bin/pic | /plan9/bin/troff -mpm | ../ADM/bm.sh > $target
 
 index:V: obj
 

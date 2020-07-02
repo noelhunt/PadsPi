@@ -15,13 +15,13 @@ static void mallocerr(){
 	abort();
 }
 
-void Pick( const char *s, Action a, long o ){
+void Pick( char *s, Action a, long o ){
 	Index ix;
 
 	trace("Pick(%d,%d)", a, o);
 	ix = ICache->place(Item(s, a, o));
 	R->pktstart( P_PICK );
-	R->sendshort( ix.sht() );
+	R->sendlong( ix.indx );
 	R->pktend();
 }
 

@@ -1,49 +1,54 @@
 #include "univ.h"
 
 char **ICache;
-Carte ***CCache;
+Carte **CCache;
 Index I_SIZE, C_SIZE;
 
 void CacheOp(Protocol p){
 	Index i;
-	int size;
+	int j, size;
 	Carte *c;
 	Index *rcv;
+	char **PICache;
+	Carte **PCCache;
 
-	i = RcvShort();
+	i = RcvLong();
 	switch( (int) p ){
 	case P_I_DEFINE:
-		assert(!ICache);
+		if ( !ICache )
+			ICache = (char **)Alloc(i * sizeof(char*));
+		else{
+			PICache = ICache;
+			ICache = (char **)Alloc(i * sizeof(char*));
+			for(j = 0; j < I_SIZE; j++)
+				ICache[j] = PICache[j];
+			free(PICache);
+		}
 		I_SIZE = i;
-		ICache = (char **) Alloc(MJR(I_SIZE) * sizeof(char*) );
 		break;
 	case P_C_DEFINE:
-		assert(!CCache);
+		if ( !CCache )
+			CCache = (Carte**) Alloc(i * sizeof(Carte*));
+		else{
+			PCCache = CCache;
+			CCache = (Carte**) Alloc(i * sizeof(Carte*));
+			for(j = 0; j < C_SIZE; j++)
+				CCache[j] = PCCache[j];
+			free(PCCache);
+		}
 		C_SIZE = i;
-		CCache = (Carte***) Alloc(MJR(C_SIZE) * sizeof(Carte*) );
 		break;
 	case P_I_CACHE:
-#ifdef GCALLOC
-		if( !ICache[MJR(i)] ) GCAlloc(MNR(I_SIZE), &ICache[MJR(i)]);
-#else
-		if( !ICache[MJR(i)] ) ICache[MJR(i)] =
-			(char*) Alloc(MNR(I_SIZE) * sizeof(Carte*));
-#endif
-		RcvString( &ICache[MJR(i)][MNR(i)] );
+		assert(!ICache[i], "P_I_CACHE");
+		RcvAllocString( &ICache[i] );
 		break;
 	case P_C_CACHE:
-		size = RcvUChar();
-		if( !CCache[MJR(i)] ) CCache[MJR(i)] =
-			(Carte**) Alloc(MNR(C_SIZE) * sizeof(Carte*));
-		assert( !CCache[MJR(i)][MNR(i)] );
-#ifdef GCALLOC
-		c = (Carte*) GCAlloc(CARTESIZE(size), (char **)&CCache[MJR(i)][MNR(i)]);
-#else
-		c = CCache[MJR(i)][MNR(i)] = (Carte*) Alloc(CARTESIZE(size));
-#endif
+		assert(!CCache[i], "P_C_CACHE");
+		size = RcvLong();
+		c = CCache[i] = (Carte*) Alloc(CARTESIZE(size));
 		c->attrib = RcvUChar();
-		for( rcv = c->bin; size-- >= 0; *rcv++ = RcvShort()) {}
-		c->size = RcvUChar();			/* recursive size   */
+		for( rcv = c->bin; size-- >= 0; *rcv++ = RcvLong()) {}
+		c->size = RcvLong();			/* recursive size   */
 		c->width = RcvUChar();			/* recursive widest */
 		break;
 	default:
@@ -53,14 +58,13 @@ void CacheOp(Protocol p){
 }
 
 char *IndexToStr(Index i){
-	assert( !(MJR(i)&CARTE) && ICache[MJR(i)] && MJR(i)<MJR(I_SIZE) );
-	return &ICache[MJR(i)][MNR(i)];
+	assert(!(i & CARTE) && i < I_SIZE, "IndexToStr");
+	return ICache[i];
 }
 
 Carte *IndexToCarte(Index i){
-	assert( MJR(i)&CARTE );
-	Index j = i;
-	i &= ~(CARTE<<8);
-	assert(MJR(i)<MJR(C_SIZE) && CCache[MJR(i)] && CCache[MJR(i)][MNR(i)]);
-	return CCache[MJR(i)][MNR(i)];
+	assert(i & CARTE, "IndexToCarte");
+	i &= ~CARTE;
+	assert(i < C_SIZE && CCache[i], "IndexToCarte C_SIZE");
+	return CCache[i];
 }

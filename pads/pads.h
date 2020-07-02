@@ -6,7 +6,7 @@
 typedef unsigned short Attrib;
 
 #define PADS_VERSION	0x930125		/* YYMMDD */
-#define CARTE		0x80
+#define CARTE		0x80000000
 #define NUMERIC		1
 
 enum Protocol {
@@ -101,6 +101,7 @@ typedef unsigned char uchar;
 
 char *StrDup(const char*);
 
+#ifdef TAC
 class Index {
 public:
 	ushort	major;
@@ -111,6 +112,15 @@ public:
 	short	sht();			/* don't inline sht() - sht() etc */
 	int	null()			{ return !(major|minor);	}
 };
+#else
+class Index {
+public:
+	int     indx;
+		Index()			{ indx = 0;	}
+		Index(int i)		{ indx  = i;	}
+       int	null()			{ return !indx;	}
+};
+#endif
 extern Index ZIndex;
 
 class Carte {
@@ -171,7 +181,7 @@ void NewHelp();
 void NewPadStats();
 class PadRcv;
 typedef void (PadRcv::*Action)(...);
-void Pick(const char*,Action,long);
+void Pick(char*,Action,long);
 long UniqueKey();
 Index NumericRange(short,short);
 void PadsWarn(PRINTF_TYPES);
@@ -277,7 +287,7 @@ public:
 const	char	*text;
 	Action	action;
 	long	opand;
-		Item(const char*,Action,long);
+		Item(char*,Action,long);
 		Item();			/* ever used ? */
 };
 
@@ -288,13 +298,13 @@ class Menu {
 public:
 		Menu();
 		~Menu();
-		Menu( const char*, Action=0, long=0 );
-	Index	index( const char* =0, Action=0, long=0 );
-	void	first( const char*, Action=0, long=0 );
+		Menu( char*, Action=0, long=0 );
+	Index	index( char* =0, Action=0, long=0 );
+	void	first( char*, Action=0, long=0 );
 	void	first( Index );
-	void	last( const char*, Action=0, long=0 );	
+	void	last( char*, Action=0, long=0 );	
 	void	last( Index );	
-	void	sort( const char*, Action=0, long=0 );
+	void	sort( char*, Action=0, long=0 );
 	void	sort( Index );
 };
 
@@ -315,12 +325,20 @@ class Cache {
 	Index	current;
 	Index	SIZE;
 public:
-		Cache(unsigned char,unsigned char);
+#ifdef TAC
+		Cache(uchar,uchar);
+#else
+		Cache(int);
+#endif
 	int	ok();
 };
 
 class ItemCache : public Cache {
+#ifdef TAC
 	Item	***cache;
+#else
+	Item	**cache;
+#endif
 	int	compare(Item*,Item*);
 public:
 		ItemCache();
@@ -329,7 +347,11 @@ public:
 };
 
 class CarteCache : public Cache {
+#ifdef TAC
 	Carte	***cache;
+#else
+	Carte	**cache;
+#endif
 	int	compare(Carte*,Carte*);
 public:
 		CarteCache();
@@ -356,11 +378,12 @@ long	RcvLong();
 ushort	RcvShort();
 uchar	RcvUChar();
 char	*RcvString();
+void	RcvAllocString(char**);
 
-void	SendLong();
-void	SendShort();
-void	SendUChar();
-void	SendString();
+void	SendLong(long);
+void	SendShort(short);
+void	SendUChar(uchar);
+void	SendString(char*);
 #else
 #include <stdio.h>
 FILE *Popen(const char*,const char*);
@@ -373,9 +396,6 @@ public:
 	int	pktbase;
 	int	pktsize;
 	uchar	writebuffer[2048];
-#ifdef TRACE
-const	char	*name[50];
-#endif
 
 	long	shiftin(int);
 	void	shiftout(int, long);

@@ -1,0 +1,2 @@
+ o Fix error return in HostProcess::hang() when hang fails.
+ o 'const'

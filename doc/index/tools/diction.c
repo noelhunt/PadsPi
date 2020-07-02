@@ -7,7 +7,12 @@
  *		2 - some error
  */
 
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
 #include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
 #include <ctype.h>
 
 #define	MAXSIZ 6500
@@ -68,9 +73,14 @@ char	*argptr;
 long tl = 0;
 long th = 0;
 
-main(argc, argv)
-char *argv[];
-{
+void execute(char *file);
+int getargc(void);
+void cgotofn(void);
+void overflo(char *s);
+void cfail(void);
+void outc(char *addr, char *file, char code);
+
+void main(int argc, char *argv[]){
 	int sv;
 	char cc;
 	while (--argc > 0 && (++argv)[0][0]=='-')
@@ -168,12 +178,10 @@ out:
 	exit(nsucc == 0);
 }
 
-execute(file)
-char *file;
-{
+void execute(char *file){
 	register char *p;
 	register struct words *c;
-	register ccount;
+	register int ccount;
 	int count1;
 	char *beg1;
 	struct words *savc;
@@ -351,9 +359,9 @@ char *file;
 	close(f);
 }
 
-getargc()
+int getargc()
 {
-	register c;
+	register int c;
 	if (wordf){
 		if((c=getc(wordf))==EOF){
 			fclose(wordf);
@@ -377,10 +385,10 @@ getargc()
 	return(c);
 }
 
-cgotofn() {
-	register c, cx;
+void cgotofn() {
+	register int c, cx;
 	register struct words *s;
-	register ct;
+	register int ct;
 	int neg;
 
 	s = smax = w;
@@ -444,13 +452,13 @@ nword:	for(;;) {
 		goto nword;
 }
 
-overflo(s)
+void overflo(s)
 char *s;
 {
 	fprintf(stderr, "wordlist too large %s\n",s);
 	exit(2);
 }
-cfail() {
+void cfail() {
 	struct words *queue[QSIZE];
 	struct words **front, **rear;
 	struct words *state;
@@ -512,12 +520,8 @@ init:	if ((s->inp) != 0) {
 			s->inp,s->out,s->nst,s->link,s->fail);
 */
 }
-outc(addr,file,code)
-char *addr;
-char *file;
-char code;
-{
-	static inside = 0;
+void outc(char *addr, char *file, char code){
+	static int inside = 0;
 
 	if(!caps && lineno && linemsg){
 		if(list)fprintf(fl,"%ld ",olcount);

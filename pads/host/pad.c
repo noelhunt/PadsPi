@@ -46,8 +46,6 @@ Pad::Pad(PadRcv *o){
 	R->pktend();
 #ifdef TAC
 	options( Implicits(_object) );
-#else
-	options(0);
 #endif
 #ifdef DAK
 	helpmenu();
@@ -144,11 +142,11 @@ void Pad::helpmenu(){
 #endif
 	
 void Pad::menu(Index ix){
-	trace( "0x%08x.menu(0x%X)", this, ix.sht() );	VOK;
+	trace( "0x%08x.menu(0x%X)", this, ix.indx );	VOK;
 	IF_LIVE( !_object ) return;
 	R->pktstart( P_CARTE );
 	R->sendobj( _object );
-	R->sendshort( ix.sht() );
+	R->sendlong( ix.indx );
 	R->pktend();
 }
 
@@ -209,7 +207,7 @@ void Pad::vinsert(long k, Attrib a, PadRcv *o, Index ix, const char *fmt, va_lis
 	Line l;
 	char t[1024];
 
-	trace( "0x%08x.vinsert(%d,0x%X,%d,%d,%s)", this, k, a, o, ix.sht(), fmt );	VOK;
+	trace( "0x%08x.vinsert(%d,0x%X,%d,%d,%s)", this, k, a, o, ix.indx, fmt );	VOK;
 	vsprintf( l.text = t, fmt, ap );
 	l.key = k ? k : UniqueKey();
 	if( !o ) a &= ~ACCEPT_KBD;
@@ -225,7 +223,7 @@ void Pad::insert(long k, Attrib a, PadRcv *o, Index ix, const char *fmt, ...){
 	va_list ap;
 
 	va_start(ap, fmt);
-	trace( "%u.insert(%d,0x%X,%d,%d,%s)", this, k, a, o, ix.sht(), fmt );	VOK;
+	trace( "%u.insert(%d,0x%X,%d,%d,%s)", this, k, a, o, ix.indx, fmt );	VOK;
 	vsprintf( l.text = t, fmt, ap );
 	l.key = k ? k : UniqueKey();
 	if( !o ) a &= ~ACCEPT_KBD;
@@ -255,7 +253,7 @@ void Pad::insert(Line &l){
 	buf[to] = '\0';
 	if(         this == prevpad
 	&&         l.key == prev.key+1
-	&& l.carte.sht() == prev.carte.sht()
+	&&  l.carte.indx == prev.carte.indx
 	&&  l.attributes == prev.attributes ){
 		trace( "P_NEXTLINE %d", l.key );
 		R->pktstart( P_NEXTLINE );
@@ -267,7 +265,7 @@ void Pad::insert(Line &l){
 		R->sendobj( l.object );
 		R->sendshort( l.object ? l.object->oid : 0);
 		R->sendlong( l.key );
-		R->sendshort( l.carte.sht() );
+		R->sendlong( l.carte.indx );
 		R->sendshort( l.attributes );
 	}
 	R->sendstring( buf );

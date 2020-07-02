@@ -12,7 +12,7 @@ void ObjectLimits(Script *s){
 	Carte *c;
 
 	if( !CIndex ) return;
-	assert( MJR(CIndex)&CARTE );
+	assert( CIndex&CARTE, "ObjectLimits" );
 	c = IndexToCarte(CIndex);
 	s->items = c->size;
 	s->width = c->width;
@@ -28,7 +28,7 @@ Entry *CarteEntry(Index ix, short i){
 	Script *s;
 	Index nix;
 
-	assert( MJR(ix)&CARTE );
+	assert( ix&CARTE, "CarteEntry" );
 	c = IndexToCarte(ix);
 	if( i >= c->size ) return 0;
 	e.script = 0;
@@ -38,8 +38,8 @@ Entry *CarteEntry(Index ix, short i){
 		return &e;
 	}
 	for( j = 1; ; ++j ){
-		assert( i>=0 && j<=c->size );
-		if( nix=c->bin[j], MJR(nix)&CARTE ){
+		assert( i>=0 && j<=c->size, "CarteEntry: loop" );
+		if( nix=c->bin[j], nix&CARTE ){
 			nest = IndexToCarte(nix);
 			if( nest->bin[0] ){
 				if( i == 0 ){

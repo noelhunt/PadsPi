@@ -475,7 +475,7 @@ public:
 void NewHostMaster() { new HostMaster; }
 
 HostMaster::HostMaster(){
-	static const char *ps[] = {
+	static char *ps[] = {
 		"/bin/ps  ",
 		"/bin/ps a",
 		"/bin/ps x",
