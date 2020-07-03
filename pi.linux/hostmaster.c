@@ -82,7 +82,7 @@ char *HostMaster::dopscmd(int cmd){
 	}
 	for (j = 0; j <= i; ++j)
 		if (2 == sscanf(psout[j], " %d %[^\n]", &pid, psout[0]))
-			makeproc(sf("%5d",pid), 0, psout[0]);
+			makeproc(sf("%d",pid), 0, psout[0]);
 out:
 	signal(SIGCHLD, save);
 	return err;

@@ -624,7 +624,7 @@ int Hostfunc::hang(char *cmd){
 
 	p = new Localproc;
 
-	snprintf(procname, sizeof(procname), "/proc/%05d", hangpid);
+	snprintf(procname, sizeof(procname), "/proc/%d", hangpid);
         pend = procname + strlen(procname);
 
 	strcpy(pend, "/as");

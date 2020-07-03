@@ -82,10 +82,14 @@ int HostProcess::fixsymtab(){
 	const char *nstab;
 	char file[80];
 
-#ifndef PROCFS
 	if (stabpath || hfn->stabfdsupported())
 		return 0;
+#ifndef PROCFS
 	sscanf(&comment[hfn->getpsfield()], "%s", file);
+	if ((nstab = pathexpand(file, PATH, 5)) == 0) {
+		insert(ERRORKEY, "Can't find symbol table file");
+		return 1;
+	}
 #else
 	sprintf(file, "/proc/%s/exe", procpath);
 	nstab = file;
