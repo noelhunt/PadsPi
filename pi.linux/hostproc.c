@@ -76,17 +76,20 @@ void HostProcess::takeover(){
 	Pick("take over", (Action)&HostProcess::substitute, (long)this);
 }
 
+#define PROCFS
+
 int HostProcess::fixsymtab(){
 	const char *nstab;
 	char file[80];
 
+#ifndef PROCFS
 	if (stabpath || hfn->stabfdsupported())
 		return 0;
 	sscanf(&comment[hfn->getpsfield()], "%s", file);
-	if ((nstab = pathexpand(file, PATH, 5)) == 0) {
-		insert(ERRORKEY, "Can't find symbol table file");
-		return 1;
-	}
+#else
+	sprintf(file, "/proc/%s/exe", procpath);
+	nstab = file;
+#endif
 	stabpath = sf("%s", nstab);
 	comment = 0;
 	master->insert(this);

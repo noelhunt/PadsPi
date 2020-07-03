@@ -118,29 +118,19 @@ Hostfunc::Hostfunc(){
 	corepid = -1;
 	_regaddr = -REGSIZE - 4;
 	bkptinstr = I386BPT;
-	pscmds[0] = 0;
-	pscmds[1] = "/usr/bin/ps -a ";
-	pscmds[2] = "/usr/bin/ps -e ";
+	pscmds[0] = "/usr/bin/ps -x";
+	pscmds[1] = "/usr/bin/ps -a";
+	pscmds[2] = "/usr/bin/ps -e";
 	pscmds[3] = 0;
 	ticks = sysconf(_SC_CLK_TCK);
 }
 
 /* Also use for initialization */
 char *Hostfunc::osname(){
-	struct passwd *pw;
-
 	if (first) {
 #ifdef NOTDEF
 		close(2); /* Otherwise error messages from ps goto rtpi */
 		open("/dev/null", 2);
-#endif
-		if (pw = ::getpwuid(getuid()))
-			sprintf(pscmd, "/usr/bin/ps -u %s", pw->pw_name);
-		else
-			sprintf(pscmd, "/usr/bin/ps");
-		pscmds[0] = pscmd;
-#ifdef FIXED
-		signal(SIGCHLD, waithandler);
 #endif
 		first = 0;
 	}
@@ -183,21 +173,26 @@ Localproc *Hostfunc::open(int pid){
 	}
 
 	p = new Localproc;
+	p->pid = pid;
+	p->opencnt = 0;
 	snprintf(buf, sizeof(buf), "/proc/%05d", pid);
         end = buf + strlen(buf);
 	(void) strcpy(end, "/stat");
 	p->statfile = StrDup(buf);
-	kill(pid, SIGCONT);
 	if (ptrace(p, R_ATTACH, 0, 0, 0)) {
 		delete p;
 		return 0;
 	}
 	p->sigmsk = sigmaskinit();
-	p->pid = pid;
 	p->opencnt = 1;
 	p->next = phead;
 	phead = p;
-	procwait(p, 0);
+	if (!procwait(p, 0)) {
+		delete p;
+		return 0;
+	}
+	if (p->state.state == UNIX_BREAKED)
+		p->state.state = UNIX_HALTED;
 	return p;
 }
 
@@ -251,11 +246,9 @@ int Hostfunc::procwaitstop(Localproc *p, int flag){
 int Hostfunc::procwait(Localproc *p, int flag){
 	int tstat;
 	int cursig;
-
 again:
 	if (p->pid != waitpid(p->pid, &tstat, (flag&WAIT_POLL)? WNOHANG: 0))
 		return 0;
-
 	if (flag & WAIT_DISCARD)
 		return 1;
 	if (WIFSTOPPED(tstat)) {
@@ -377,9 +370,9 @@ char *Hostfunc::step(Localproc *p){
 }
 
 int Hostfunc::ptrace(Localproc *p, enum ptracereq req, long addr, int n, long *data){
-	int ok = 1, bytes = 0;
 	char *a2 = (char*) data;
 	int i = 0, j, k;
+	char error[100];
 	union ptraceval buf;
 	enum __ptrace_request cmd = ptracecmd[req];
 
@@ -391,7 +384,12 @@ int Hostfunc::ptrace(Localproc *p, enum ptracereq req, long addr, int n, long *d
 		case PTRACE_DETACH:
 		case PTRACE_SETREGS:
 		case PTRACE_GETREGS:
-			return ::ptrace(cmd, p->pid, NULL, data);
+			errno = 0;
+			::ptrace(cmd, p->pid, NULL, data);
+			if(errno == 0) return 0;
+			sprintf(error, "ptrace: %s", strerror(errno));
+			return 1;
+			
 	}
 	if (req == R_READ) {
 		for(i=0, j=n, errno=0; j >= WORDSIZE; ++i, j-=WORDSIZE, errno=0){
